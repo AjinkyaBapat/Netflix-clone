@@ -45,6 +45,13 @@ pipeline {
                 sh 'npm install'
             }
         }
+
+        stage('OWASP Dependency Check') {
+            steps {
+                dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'owasp-check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+            }
     }
 }
 

@@ -51,7 +51,13 @@ pipeline {
                 dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'owasp-check', nvdCredentialsId: 'nvd-api-key'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
+        }
+
+        stage('Trivy FS Scan') {
+            steps {
+                sh 'trivy fs --format template --template "@/usr/local/share/trivy/templates/html.tpl" -o report.html .'
             }
+        }
     }
 }
 

@@ -57,13 +57,9 @@ pipeline {
             steps {
                 sh 'trivy fs --format json -o trivy-fs-report.json .'
                 recordIssues enabledForFailure: true, sourceCodeRetention: 'LAST_BUILD', tools: [trivy(pattern: '**/trivy-fs-report.json')]
+                sh 'trivy scan2html generate --scan2html-flags --output Trivy-FS-ScanReport.html --from trivy-fs-report.json'
             }
         }
-        // stage('Publish Trivy Report') {
-        //     steps{
-        //         publishIssues
-        //     }
-        // }
     }
 }
 

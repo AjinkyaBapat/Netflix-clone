@@ -55,9 +55,15 @@ pipeline {
 
         stage('Trivy FS Scan') {
             steps {
-                sh 'trivy fs --format template --template "@/usr/local/share/trivy/templates/html.tpl" -o report.html .'
+                sh 'trivy fs --format json -o trivy-fs-report.json .'
+                recordIssues enabledForFailure: true, sourceCodeRetention: 'LAST_BUILD', tools: [trivy(pattern: '**/trivy-fs-report.json')]
             }
         }
+        // stage('Publish Trivy Report') {
+        //     steps{
+        //         publishIssues
+        //     }
+        // }
     }
 }
 

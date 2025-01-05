@@ -8,6 +8,7 @@ pipeline {
 
     environment {
         SCANNNER_HOME = tool 'sonar-scanner'
+        TMDb_V3_API_KEY = credentials('tmdb-api-key')
     }
 
     stages {
@@ -19,24 +20,23 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/AjinkyaBapat/Netflix-clone.git'
+                gitCheckout(
+                    url: "https://github.com/AjinkyaBapat/Netflix-clone.git",
+                    credentialsId: "github-cred",
+                    branch: "main"
+                    )
             }
         }
 
         stage('Sonar analysis') {
             steps {
-                withSonarQubeEnv('sonar-server') {
-                    sh '''
-                        ${SCANNNER_HOME}/bin/sonar-scanner -Dsonar.projectName=Netflix \
-                        -Dsonar.projectKey=Netflix
-                    '''
-                }
-            }
-        }
-
-        stage('Sonar Quality Gate') {
-            steps {
-                waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
+                sonarAnalysis(
+                    sonarServer: 'sonar-server',
+                    projectName: 'Netflix',
+                    projectKey: 'Netflix',
+                    abortPipeline: false,
+                    credentialsId: 'Sonar-token'
+                )
             }
         }
 
@@ -48,7 +48,9 @@ pipeline {
 
         stage('OWASP Dependency Check') {
             steps {
-                dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'owasp-check', nvdCredentialsId: 'nvd-api-key'
+                dependencyCheck additionalArguments: '--scan ./',
+                                odcInstallation: 'owasp-check',
+                                nvdCredentialsId: 'nvd-api-key'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
@@ -56,10 +58,23 @@ pipeline {
         stage('Trivy FS Scan') {
             steps {
                 sh 'trivy fs --format json -o trivy-fs-report.json .'
-                recordIssues enabledForFailure: true, sourceCodeRetention: 'LAST_BUILD', tools: [trivy(pattern: '**/trivy-fs-report.json')]
+                recordIssues enabledForFailure: true,
+                             sourceCodeRetention: 'LAST_BUILD',
+                             tools: [trivy(pattern: '**/trivy-fs-report.json')]
                 sh 'trivy scan2html generate --scan2html-flags --output Trivy-FS-ScanReport.html --from trivy-fs-report.json'
             }
         }
+
+        stage('Docker Build and Push') {
+            steps {
+                script {
+                    withDockerRegistry(toolName: 'docker-tool', credentialsId: 'docker-cred') {
+                        sh 'docker build --build-arg TMDB_V3_API_KEY=${TMDb_V3_API_KEY} -t netflix-clone .'
+                        sh 'docker tag netflix-clone iamajinkya/netflix-clone:${BUILD_NUMBER}'
+
+                    }
+                }
+            }
+        }
     }
-}
 

@@ -36,6 +36,7 @@ pipeline {
                     projectKey: 'Netflix',
                     abortPipeline: false,
                     credentialsId: 'Sonar-token'
+                    scannerHome: SCANNNER_HOME
                 )
             }
         }

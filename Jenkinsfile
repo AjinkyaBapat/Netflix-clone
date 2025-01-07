@@ -21,9 +21,9 @@ pipeline {
         stage('Checkout') {
             steps {
                 gitCheckout(
-                    url: "https://github.com/AjinkyaBapat/Netflix-clone.git",
-                    credentialsId: "github-cred",
-                    branch: "main"
+                    url: 'https://github.com/AjinkyaBapat/Netflix-clone.git',
+                    credentialsId: 'github-cred',
+                    branch: 'main'
                     )
             }
         }
@@ -69,7 +69,7 @@ pipeline {
                 dockerBuildandPush(
                     toolName: 'docker-tool',
                     credentialsId: 'docker-cred',
-                    buildArg: "TMDB_V3_API_KEY=${TMDb_V3_API_KEY}",
+                    buildArg: 'TMDB_V3_API_KEY=$TMDb_V3_API_KEY',
                     registryName: 'iamajinkya',
                     imageName: 'netflix-clone'
                 )

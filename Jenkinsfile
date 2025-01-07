@@ -64,17 +64,17 @@ pipeline {
             }
         }
 
-        // stage('Docker Build and Push') {
-        //     steps {
-        //         script {
-        //             withDockerRegistry(toolName: 'docker-tool', credentialsId: 'docker-cred') {
-        //                 sh 'docker build --build-arg TMDB_V3_API_KEY=${TMDb_V3_API_KEY} -t netflix-clone .'
-        //                 sh 'docker tag netflix-clone iamajinkya/netflix-clone:${BUILD_NUMBER}'
-
-        //             }
-        //         }
-        //     }
-        // }
-    }
+        stage('Docker Build and Push') {
+            steps {
+                dockerBuildandPush(
+                    toolName: 'docker-tool',
+                    credentialsId: 'docker-cred',
+                    buildArg: "TMDB_V3_API_KEY=${TMDb_V3_API_KEY}",
+                    registryName: 'iamajinkya',
+                    imageName: 'netflix-clone'
+                )
+                }
+            }
+        }
 }
 

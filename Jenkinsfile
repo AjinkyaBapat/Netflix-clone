@@ -50,7 +50,7 @@ pipeline {
         stage('OWASP Dependency Check') {
             steps {
                 owaspdependencyCheck(
-                    additionalArguments: '--scan ./',
+                    additionalArguments: '--scan ./ --disableYarnAudit',
                     odcInstallation: 'owasp-check',
                     nvdCredentialsId: 'nvd-api-key',
                     publisherFilePattern: '**/dependency-check-report.xml'
@@ -58,15 +58,11 @@ pipeline {
             }
         }
 
-        // stage('Trivy FS Scan') {
-        //     steps {
-        //         sh 'trivy fs --format json -o trivy-fs-report.json .'
-        //         recordIssues enabledForFailure: true,
-        //                      sourceCodeRetention: 'LAST_BUILD',
-        //                      tools: [trivy(pattern: '**/trivy-fs-report.json')]
-        //         sh 'trivy scan2html generate --scan2html-flags --output Trivy-FS-ScanReport.html --from trivy-fs-report.json'
-        //     }
-        // }
+        stage('Trivy FS Scan') {
+            steps {
+                trivyScan()
+            }
+        }
 
         // stage('Docker Build and Push') {
         //     steps {

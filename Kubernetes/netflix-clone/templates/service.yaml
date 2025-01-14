@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "netflix-clone.fullname" . }}
+  labels:
+    {{- include "netflix-clone.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.port}}
+      nodePort: {{ .Values.service.nodePort }}
+  selector:
+    {{- include "netflix-clone.selectorLabels" . | nindent 4 }}
